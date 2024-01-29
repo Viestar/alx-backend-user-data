@@ -11,11 +11,9 @@ class Auth:
         """ Returns False, For now, always until further implementation"""
         return False
 
-
     def authorization_header(self, request=None) -> str:
         """ Returns None, For now, always until further implementation """
         return None
-    
 
     def current_user(self, request=None) -> TypeVar('User'):
         """ Returns None, For now, always until more implementation """
