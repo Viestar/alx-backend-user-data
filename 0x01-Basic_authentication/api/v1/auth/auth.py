@@ -24,7 +24,11 @@ class Auth:
 
     def authorization_header(self, request=None) -> str:
         """ Returns None, For now, always until further implementation """
-        return None
+        if request is None:
+            return None
+        elif 'Authorisation' not in request.headers:
+            return None
+        return request.headers['Authorisation']
 
     def current_user(self, request=None) -> TypeVar('User'):
         """ Returns None, For now, always until more implementation """
