@@ -9,6 +9,10 @@ class Auth:
     """ Class for Authorisation on requirements, headers and users"""
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """ Returns False, For now, always until further implementation"""
+        if excluded_paths is None or path is None:
+            return True
+        elif path not in excluded_paths:
+            return True
         return False
 
     def authorization_header(self, request=None) -> str:
