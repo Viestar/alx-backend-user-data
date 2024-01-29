@@ -6,6 +6,7 @@ from typing import List, TypeVar
 
 
 class Auth:
+    """ Class for Authorisation on requirements, headers and users"""
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """ Returns False, For now, always until further implementation"""
         return False
