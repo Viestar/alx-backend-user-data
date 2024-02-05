@@ -56,6 +56,8 @@ def before_request() -> str:
         abort(401)
     if auth.current_user(request) is None:
         abort(403)
+    if auth.authorization_header(request):
+        abort(403)
 
 
 if __name__ == "__main__":
