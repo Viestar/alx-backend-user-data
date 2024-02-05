@@ -19,9 +19,9 @@ if os.getenv("AUTH_TYPE", None) == "auth":
     auth = Auth()
 
 
-# if os.getenv("AUTH_TYPE", None) == "basic_auth":
-#     from api.v1.auth.basic_auth import BasicAuth
-#     auth = BasicAuth()
+if os.getenv("AUTH_TYPE", None) == "basic_auth":
+    from api.v1.auth.basic_auth import BasicAuth
+    auth = BasicAuth()
 
 
 @app.errorhandler(404)
