@@ -15,7 +15,7 @@ class Auth:
 
         for excluded_path in excluded_paths:
             if excluded_path.endswith('*'):
-                """ # Remove the asterisk and check if 
+                """ # Remove the asterisk and check if
                 the path starts with the excluded path """
                 base_excluded_path = excluded_path.rstrip('*')
                 if path.startswith(base_excluded_path):
