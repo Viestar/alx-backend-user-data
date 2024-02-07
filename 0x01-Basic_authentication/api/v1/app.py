@@ -1,61 +1,69 @@
 #!/usr/bin/env python3
-'''
-    module defining the Auth class
-'''
-from flask import request
-from typing import List, TypeVar
+"""
+Route module for the API
+"""
+from os import getenv
+from api.v1.views import app_views
+from flask import Flask, jsonify, abort, request
+from flask_cors import (CORS, cross_origin)
+import os
 
 
-class Auth:
+app = Flask(__name__)
+app.register_blueprint(app_views)
+CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
+auth = None
+
+AUTH_TYPE = os.getenv("AUTH_TYPE")
+
+if AUTH_TYPE == 'auth':
+    from api.v1.auth.auth import Auth
+    auth = Auth()
+elif AUTH_TYPE == 'basic_auth':
+    from api.v1.auth.basic_auth import BasicAuth
+    auth = BasicAuth()
+
+
+@app.before_request
+def before_request():
     '''
-        class definition of the Auth
+        function that helps filter requests
     '''
+    if auth is None:
+        pass
+    else:
+        excluded_list = ['/api/v1/status/',
+                         '/api/v1/unauthorized/', '/api/v1/forbidden/']
 
-    def require_auth(
-            self,
-            path: str,
-            excluded_paths: List[str]
-    ) -> bool:
-        '''
-            returns False - path and excluded_paths
-            will be used later, now, you don’t need
-            to take care of them
-        '''
-        if path is not None and excluded_paths is not None:
-            for exclusion_path in map(str.strip, excluded_paths):
-                pattern = ''
-                if exclusion_path.endswith('*'):
-                    pattern = exclusion_path[:-1]
-                    if path.startswith(pattern):
-                        return False
-                elif exclusion_path.endswith('/'):
-                    pattern = exclusion_path[:-1]
-                    if path == pattern or path.startswith(pattern + '/'):
-                        return False
-                else:
-                    pattern = exclusion_path
-                    if path == pattern or path.startswith(pattern + '/'):
-                        return False
-        return True
+        if auth.require_auth(request.path, excluded_list):
+            if auth.authorization_header(request) is None:
+                abort(401, description="Unauthorized")
+            if auth.current_user(request) is None:
+                abort(403, description='Forbidden')
 
-    def authorization_header(self, request=None) -> str:
-        '''
-           returns None - request will be the Flask
-           request object
 
-        if request is None:
-            return None
+@app.errorhandler(401)
+def unauthorized(error) -> str:
+    """ unauthorized acccess handler
+    """
+    return jsonify({"error": "Unauthorized"}), 401
 
-        header = request.headers.get('Authorization')
-        if header:
-            return header
-        return None
-        '''
-        return request.headers.get('Authorization') if request else None
 
-    def current_user(self, request=None) -> TypeVar('User'):
-        '''
-           returns None - request will be the Flask request
-           object
-        '''
-        return None
+@app.errorhandler(403)
+def forbidden_access(error) -> str:
+    """ no access handler
+    """
+    return jsonify({"error": "Forbidden"}), 403
+
+
+@app.errorhandler(404)
+def not_found(error) -> str:
+    """ Not found handler
+    """
+    return jsonify({"error": "Not found"}), 404
+
+
+if __name__ == "__main__":
+    host = getenv("API_HOST", "0.0.0.0")
+    port = getenv("API_PORT", "5000")
+    app.run(host=host, port=port)
